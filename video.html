@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Spectacle: Video Compilation</title>
+    <style>
+        :root {
+            --bg-dark: #0A0A1F;
+            --text-light: #E0E0FF;
+            --accent-blue: #00BFFF;
+            --accent-purple: #8A2BE2;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 191, 255, 0.4);
+            --hover-glow: rgba(0, 191, 255, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, var(--accent-purple) 0%, transparent 25%),
+                        radial-gradient(circle at bottom right, var(--accent-blue) 0%, transparent 25%);
+            background-size: 200% 200%;
+            animation: moveBackground 20s infinite alternate linear;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes moveBackground {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(to bottom, rgba(10, 10, 31, 0.8), transparent);
+            position: relative;
+            z-index: 1;
+        }
+
+        header h1 {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            color: var(--accent-blue);
+            text-shadow: 0 0 15px var(--accent-blue);
+        }
+
+        header p {
+            font-size: 1.2em;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meteor-shower-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 25px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .meteor-shower-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 0 30px var(--hover-glow);
+        }
+
+        .card-header {
+            display: flex;
+            flex-direction: column; /* Changed to column for thumbnail above text */
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .card-header .thumbnail { /* New style for the thumbnail */
+            width: 100%; /* Make thumbnail responsive within card */
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .card-header .thumbnail:hover {
+            transform: scale(1.03);
+        }
+
+        .card-header h2 {
+            font-size: 1.2em; /* Adjusted font size for title below thumbnail */
+            color: var(--accent-purple);
+            margin: 0;
+            text-align: center;
+        }
+
+        .peak-info {
+            font-size: 0.9em;
+            color: var(--accent-blue);
+            background-color: rgba(0, 191, 255, 0.15);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px; /* Space between title and peak info */
+        }
+
+        .meteor-shower-card p {
+            font-size: 1.05em;
+            color: var(--text-light);
+            opacity: 0.9;
+        }
+        
+        /* New style for video link */
+        .video-link {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--accent-blue);
+            border: 1px solid var(--accent-blue);
+            padding: 10px;
+            border-radius: 6px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        
+        .video-link:hover {
+            background-color: var(--accent-blue);
+            color: var(--bg-dark);
+        }
+
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 50px;
+            color: var(--text-light);
+            opacity: 0.6;
+            background: linear-gradient(to top, rgba(10, 10, 31, 0.8), transparent);
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5em;
+            }
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .meteor-shower-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <header>
+        <h1>Cosmic Video Compilation</h1>
+        <p>A Collection of YouTube Links</p>
+    </header>
+
+    <main class="container">
+        
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/O2WDdTc3kfE/hqdefault.jpg" alt="Video Thumbnail for O2WDdTc3kfE" class="thumbnail">
+                <h2>A Fascinating Dive</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>A fascinating dive into a cosmic topic. Click below to explore the content of this video.</p>
+            <a href="https://www.youtube.com/watch?v=O2WDdTc3kfE" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/diDj1aOWe7I/hqdefault.jpg" alt="Video Thumbnail for diDj1aOWe7I" class="thumbnail">
+                <h2>Exploring Unknown Depths</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>Exploring the unknown depths of space. This video promises an insightful view of a stellar event.</p>
+            <a href="https://www.youtube.com/watch?v=diDj1aOWe7I" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/eE8S4uvUoVI/hqdefault.jpg" alt="Video Thumbnail for eE8S4uvUoVI" class="thumbnail">
+                <h2>Astronomical Concepts</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>An educational look at a key astronomical concept. Follow the link to begin your journey.</p>
+            <a href="https://www.youtube.com/watch?v=eE8S4uvUoVI" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/qAR-6XTBdkI/hqdefault.jpg" alt="Video Thumbnail for qAR-6XTBdkI" class="thumbnail">
+                <h2>Popular Space Subject</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>High-quality footage and commentary on a popular space subject. Check out the spectacular views.</p>
+            <a href="https://www.youtube.com/watch?v=qAR-6XTBdkI" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/kKFc3Np2VUw/hqdefault.jpg" alt="Video Thumbnail for kKFc3Np2VUw" class="thumbnail">
+                <h2>Science Behind the Cosmos</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>Discover the science behind the cosmos in this in-depth video exploration.</p>
+            <a href="https://www.youtube.com/watch?v=kKFc3Np2VUw" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/P5ceMnvgfRA/hqdefault.jpg" alt="Video Thumbnail for P5ceMnvgfRA" class="thumbnail">
+                <h2>Astronomical Development</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>Witness a captivating presentation on a major astronomical development. Link included for viewing.</p>
+            <a href="https://www.youtube.com/watch?v=P5ceMnvgfRA" target="_blank" class="video-link">Watch Video</a>
+        </section>
+        
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/ZyyrfB8s5cY/hqdefault.jpg" alt="Video Thumbnail for ZyyrfB8s5cY" class="thumbnail">
+                <h2>Complex Space Topic</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>A quick summary of a complex space topic, perfect for a fast learning experience.</p>
+            <a href="https://www.youtube.com/watch?v=ZyyrfB8s5cY" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/96owQKfp2Bw/hqdefault.jpg" alt="Video Thumbnail for 96owQKfp2Bw" class="thumbnail">
+                <h2>Extraordinary Universe</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>Dive deep into an extraordinary part of the universe. Click to watch this compelling content.</p>
+            <a href="https://www.youtube.com/watch?v=96owQKfp2Bw" target="_blank" class="video-link">Watch Video</a>
+        </section>
+        
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/F4xavj2hqSU/hqdefault.jpg" alt="Video Thumbnail for F4xavj2hqSU" class="thumbnail">
+                <h2>Latest Findings</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>A recent upload with the latest findings and visuals from space exploration.</p>
+            <a href="https://www.youtube.com/watch?v=F4xavj2hqSU" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/PRdq6Hf6KXU/hqdefault.jpg" alt="Video Thumbnail for PRdq6Hf6KXU" class="thumbnail">
+                <h2>Science of the Stars</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>The science of the stars presented beautifully. Check out the link for stellar education.</p>
+            <a href="https://www.youtube.com/watch?v=PRdq6Hf6KXU" target="_blank" class="video-link">Watch Video</a>
+        </section>
+        
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/7TfE35Fr_00/hqdefault.jpg" alt="Video Thumbnail for 7TfE35Fr_00" class="thumbnail">
+                <h2>Celestial Body Focus</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>Focusing on a specific celestial body or phenomenon. A great resource for in-depth viewing.</p>
+            <a href="https://www.youtube.com/watch?v=7TfE35Fr_00" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/AVoV0IDivAQ/hqdefault.jpg" alt="Video Thumbnail for AVoV0IDivAQ" class="thumbnail">
+                <h2>Major Space Mission</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>This video provides an excellent summary and context on a major space mission or discovery.</p>
+            <a href="https://www.youtube.com/watch?v=AVoV0IDivAQ" target="_blank" class="video-link">Watch Video</a>
+        </section>
+        
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/uSMGENDH_QI/hqdefault.jpg" alt="Video Thumbnail for uSMGENDH_QI" class="thumbnail">
+                <h2>Visual Journey</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>A spectacular visual journey into the farthest reaches of the universe. Click here to watch.</p>
+            <a href="https://www.youtube.com/watch?v=uSMGENDH_QI" target="_blank" class="video-link">Watch Video</a>
+        </section>
+        
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <img src="https://img.youtube.com/vi/8Sl8m5-Tutk/hqdefault.jpg" alt="Video Thumbnail for 8Sl8m5-Tutk" class="thumbnail">
+                <h2>Mysteries of Space</h2>
+                <span class="peak-info">YouTube Link</span>
+            </div>
+            <p>Uncovering the mysteries of space with expert commentary and incredible graphics.</p>
+            <a href="https://www.youtube.com/watch?v=8Sl8m5-Tutk" target="_blank" class="video-link">Watch Video</a>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Video Compilation Insights</p>
+    </footer>
+</body>
+</html>
