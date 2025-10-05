@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>METEOR MADNESS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&family=Inter:wght@400;600&display=swap');
+
+        /* Professional Meteor Theme Colors */
+        :root {
+            --color-dark-space: #010410; /* Near Black */
+            --color-mid-dark: #121A26;
+            --color-accent-blue: #00A3FF; /* Electric Blue/Cyan */
+            --color-accent-orange: #FF5722; /* Fiery Orange/Red */
+            --color-light-text: #E0E0E0;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--color-light-text);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+            /* Ensure the body is set to the background gradient/animation */
+            background-color: var(--color-dark-space);
+            background-image: radial-gradient(at 0% 0%, #1a0836 0%, transparent 50%),
+                             radial-gradient(at 100% 100%, #081a36 0%, transparent 50%);
+            background-size: 400% 400%;
+            animation: cosmicMove 180s ease-in-out infinite alternate;
+        }
+
+        /* New keyframes for background motion */
+        @keyframes cosmicMove {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        /* Hero Section */
+        #hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+            background: transparent; 
+        }
+        
+        /* --- VIDEO BACKGROUND STYLING --- */
+        #hero-video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures video covers the entire container */
+            z-index: -1; /* Pushes video behind all other content */
+            filter: brightness(0.65); /* Darken the video slightly for text readability */
+        }
+        /* --- END VIDEO BACKGROUND STYLING --- */
+
+        /* Hero Text Styles */
+        #hero h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: clamp(3rem, 10vw, 6rem);
+            color: white;
+            letter-spacing: 5px;
+            text-shadow: 0 0 20px var(--color-accent-blue), 0 0 40px rgba(0, 163, 255, 0.5);
+            margin-bottom: 20px;
+            z-index: 5; /* Ensure H1 is above the video */
+        }
+
+        /* Fade animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 2s ease-in-out forwards; }
+        .animate-fadeInSlow { animation: fadeIn 3s ease-in-out forwards; }
+
+        /* Stars/Twinkle Background */
+        .stars {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            box-shadow: 20px 30px #fff, 100px 150px #fff, 200px 80px #fff,
+                        300px 120px #fff, 400px 200px #fff, 500px 250px #fff,
+                        600px 50px #fff, 750px 180px #fff, 850px 100px #fff,
+                        1000px 20px #fff, 1150px 250px #fff, 1250px 150px #fff,
+                        150px 500px #fff, 300px 650px #fff, 450px 700px #fff,
+                        700px 550px #fff, 900px 780px #fff, 1100px 620px #fff;
+            animation: twinkle 5s infinite alternate;
+            z-index: 5; /* Ensure stars are above the video */
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        /* Shooting Meteor - Passes every 5 seconds */
+        .shooting-star {
+            position: absolute;
+            top: 10%;
+            left: -10%;
+            width: 3px;
+            height: 100px;
+            /* Fiery/Electric Trail */
+            background: linear-gradient(to bottom right, var(--color-accent-orange), var(--color-accent-blue), transparent);
+            transform: rotate(45deg);
+            animation: shoot 5s linear infinite; /* 5s cycle */
+            filter: drop-shadow(0 0 5px var(--color-accent-orange));
+            z-index: 5; /* Ensure meteor is above the video */
+        }
+
+        @keyframes shoot {
+            0% { transform: translateX(0vw) translateY(0vh) rotate(45deg); opacity: 0; }
+            1% { opacity: 1; } /* Appear instantly */
+            10% { transform: translateX(120vw) translateY(60vh) rotate(45deg); opacity: 0; } /* Travel quickly and disappear */
+            100% { opacity: 0; } /* Invisible for the rest of the 5s cycle */
+        }
+
+        /* Explore Button Style - Now an anchor */
+        #explore-btn {
+            display: inline-block;
+            background: var(--color-accent-orange);
+            color: var(--color-dark-space);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+            transition: all 0.3s ease;
+            text-decoration: none; /* Important for anchor tag */
+            z-index: 10;
+        }
+        #explore-btn:hover {
+            background: #FF7043;
+            box-shadow: 0 4px 20px rgba(255, 87, 34, 0.8);
+            transform: translateY(-2px);
+        }
+        
+        /* Navigation Button Styles (Home and About Us) */
+        .nav-btn {
+            position: fixed;
+            top: 20px;
+            padding: 8px 12px;
+            color: var(--color-accent-orange); 
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            cursor: pointer;
+            z-index: 50;
+            transition: color 0.3s;
+            border: 1px solid transparent;
+        }
+        .nav-btn:hover {
+            color: white;
+            border-color: var(--color-accent-orange);
+            border-radius: 4px;
+        }
+        
+        #about-us-btn { right: 150px; }
+        #home-btn { right: 260px; } 
+
+        /* Play Button - Themed Accent */
+        .play-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            padding: 8px 12px;
+            background: var(--color-accent-orange);
+            color: var(--color-dark-space);
+            font-family: 'Inter', sans-serif;
+            border: none;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+            z-index: 50;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: var(--color-mid-dark);
+            margin: 5% auto;
+            padding: 30px;
+            border: 1px solid var(--color-accent-blue);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 163, 255, 0.5);
+        }
+        .close-btn {
+            color: var(--color-accent-orange);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close-btn:hover, .close-btn:focus {
+            color: white;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .about-us-text h2 {
+            font-family: 'Poppins', sans-serif;
+            color: var(--color-accent-blue);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="nav-btn" id="home-btn">Home</a>
+    <a href="javascript:void(0)" onclick="openModal('about-us-modal')" class="nav-btn" id="about-us-btn">About Us</a>
+
+    <audio id="bg-music" loop>
+        <source src="C:\Users\kite_\OneDrive\Desktop\NASA\Interstellar Official Soundtrack  Cornfield Chase  Hans Zimmer  WaterTower.mp3" type="audio/mpeg">
+    </audio>
+    <button class="play-btn" onclick="document.getElementById('bg-music').play(); localStorage.setItem('musicPlayed', 'true')">Play Song 🔊</button>
+
+    <section id="hero">
+        <video autoplay muted loop id="hero-video">
+            <source src="C:\Users\kite_\OneDrive\Desktop\NASA\edit about space 4k 120fps.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        
+        <div class="stars"></div>
+        <div class="shooting-star"></div>
+
+        <h1 class="animate-fadeIn" style="z-index: 5;">METEOR MADNESS</h1>
+        <a href="javascript:void(0)" onclick="startExploring()" id="explore-btn" class="animate-fadeInSlow" style="z-index: 5;">EXPLORE NOW</a>
+    </section>
+
+    <div id="about-us-modal" class="modal">
+        <div class="modal-content about-us-text">
+            <span onclick="closeModal('about-us-modal')" class="close-btn">&times;</span>
+            <h2>METEOR MADNESS</h2>
+            <p>
+                Welcome to Meteor Madness — a creative cosmic experience designed by Team Astro Invaders
+                for the NASA Space Apps Challenge 2025. Our website brings the wonder of meteors to life
+                through art, interactivity, and imagination. We’ve crafted four unique sections:
+
+                Theory: Explore the fascinating science behind meteors — their journey, impact, and origin.
+
+                Storytelling: Discover how meteors have inspired myths, stories, and creative works across cultures.
+
+                3D: Experience meteors in motion through interactive 3D visualizations.
+
+                Game: Enjoy a simple, fun space-themed game — created purely for entertainment and cosmic vibes!
+
+                Meteor Madness combines education, creativity, and technology to make space science both
+                informative and visually engaging.
+            </p>
+        </div>
+    </div>
+
+
+    <script>
+        // --- Modal Utility Functions ---
+        function openModal(id) {
+            document.getElementById(id).style.display = 'block';
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+        
+        // NEW FUNCTION: Set flag and navigate
+        function startExploring() {
+            // Check if music is playing. If so, set the flag.
+            const music = document.getElementById('bg-music');
+            if (!music.paused) {
+                localStorage.setItem('musicPlayed', 'true');
+            } else {
+                localStorage.setItem('musicPlayed', 'false'); // Or simply remove the item
+            }
+            window.location.href = 'content.html';
+        }
+
+        // Initial check to try playing music (often fails due to autoplay policy)
+        window.onload = () => {
+             document.getElementById('bg-music').play().catch(e => console.log("Music auto-play blocked. User must press button."));
+             // If autoplay works, set the flag immediately
+             const music = document.getElementById('bg-music');
+             if (!music.paused) {
+                localStorage.setItem('musicPlayed', 'true');
+             }
+        };
+    </script>
+
+</body>
+</html>
