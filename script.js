@@ -1,0 +1,566 @@
+// Global variables
+let scene, camera, renderer, meteor, controls;
+let starField, animationId;
+
+// Initialize the 3D scene
+function init() {
+    // Create scene
+    scene = new THREE.Scene();
+    
+    // Create camera
+    camera = new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth / window.innerHeight,
+        0.1,
+        1000
+    );
+    camera.position.set(0, 0, 8);
+    
+    // Create renderer
+    const canvas = document.getElementById('meteor-canvas');
+    renderer = new THREE.WebGLRenderer({ 
+        canvas: canvas,
+        antialias: true,
+        alpha: true
+    });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setClearColor(0x000000, 1);
+    
+    // Create starfield
+    createStarField();
+    
+    // Create Earth background
+    createEarthBackground();
+    
+    // Create different meteor
+    createDifferentMeteor();
+    
+    // Setup lighting
+    setupLighting();
+    
+    // Add atmospheric effects
+    addAtmosphericEffects();
+    
+    // Setup orbit controls
+    setupControls();
+    
+    // Hide loading screen
+    document.body.classList.add('loaded');
+    
+    // Start animation
+    animate();
+}
+
+// Create simple starfield
+function createStarField() {
+    // Create simple starfield to avoid rendering issues
+    createStarLayer(2000, 200, 1.0, 1.0); // Simple stars
+}
+
+function createStarLayer(count, radius, size, opacity) {
+    const starGeometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+    
+    for (let i = 0; i < count; i++) {
+        const i3 = i * 3;
+        
+        // Simple random distribution
+        positions[i3] = (Math.random() - 0.5) * radius;
+        positions[i3 + 1] = (Math.random() - 0.5) * radius;
+        positions[i3 + 2] = (Math.random() - 0.5) * radius;
+        
+        // Simple white stars
+        colors[i3] = 1.0; // R
+        colors[i3 + 1] = 1.0; // G
+        colors[i3 + 2] = 1.0; // B
+    }
+    
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    
+    const starMaterial = new THREE.PointsMaterial({
+        size: size,
+        vertexColors: true,
+        transparent: true,
+        opacity: opacity
+    });
+    
+    const starLayer = new THREE.Points(starGeometry, starMaterial);
+    scene.add(starLayer);
+}
+
+// Create realistic Earth background
+function createEarthBackground() {
+    // Create Earth sphere with realistic texture
+    const earthGeometry = new THREE.SphereGeometry(50, 64, 64);
+    const earthTexture = createEarthTexture();
+    const earthMaterial = new THREE.MeshStandardMaterial({
+        map: earthTexture,
+        transparent: true,
+        opacity: 0.9
+    });
+    const earth = new THREE.Mesh(earthGeometry, earthMaterial);
+    earth.position.set(0, 0, -100);
+    scene.add(earth);
+    
+    // Create atmosphere
+    const atmosphereGeometry = new THREE.SphereGeometry(52, 32, 32);
+    const atmosphereMaterial = new THREE.MeshBasicMaterial({
+        color: 0x2a5a7a,
+        transparent: true,
+        opacity: 0.2,
+        side: THREE.BackSide
+    });
+    const atmosphere = new THREE.Mesh(atmosphereGeometry, atmosphereMaterial);
+    atmosphere.position.set(0, 0, -100);
+    scene.add(atmosphere);
+    
+    // Create cloud layer
+    const cloudGeometry = new THREE.SphereGeometry(51, 32, 32);
+    const cloudTexture = createCloudTexture();
+    const cloudMaterial = new THREE.MeshBasicMaterial({
+        map: cloudTexture,
+        transparent: true,
+        opacity: 0.4
+    });
+    const clouds = new THREE.Mesh(cloudGeometry, cloudMaterial);
+    clouds.position.set(0, 0, -100);
+    scene.add(clouds);
+}
+
+// Create Earth texture with continents and oceans
+function createEarthTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    // Base ocean color
+    ctx.fillStyle = '#1a4a7a';
+    ctx.fillRect(0, 0, 1024, 512);
+    
+    // Add continents (simplified world map)
+    ctx.fillStyle = '#2a5a3a';
+    
+    // North America
+    ctx.beginPath();
+    ctx.ellipse(200, 150, 80, 60, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // South America
+    ctx.beginPath();
+    ctx.ellipse(250, 280, 40, 80, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Europe/Africa
+    ctx.beginPath();
+    ctx.ellipse(450, 200, 60, 100, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Asia
+    ctx.beginPath();
+    ctx.ellipse(600, 180, 120, 80, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Australia
+    ctx.beginPath();
+    ctx.ellipse(700, 350, 50, 30, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Add some land details
+    ctx.fillStyle = '#3a6a4a';
+    for (let i = 0; i < 50; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            Math.random() * 1024,
+            Math.random() * 512,
+            Math.random() * 8 + 2,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    return texture;
+}
+
+// Create cloud texture
+function createCloudTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    // Transparent background
+    ctx.clearRect(0, 0, 1024, 512);
+    
+    // Add cloud patterns
+    ctx.fillStyle = '#ffffff';
+    for (let i = 0; i < 100; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 512;
+        const size = Math.random() * 30 + 10;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.ClampToEdgeWrapping;
+    return texture;
+}
+
+// Create realistic meteor entering atmosphere
+function createDifferentMeteor() {
+    const group = new THREE.Group();
+    
+    // Main meteor body - irregular rocky shape
+    const mainGeometry = new THREE.SphereGeometry(2, 32, 32);
+    const mainPositions = mainGeometry.attributes.position;
+    
+    // Deform to create irregular rocky surface
+    for (let i = 0; i < mainPositions.count; i++) {
+        const x = mainPositions.getX(i);
+        const y = mainPositions.getY(i);
+        const z = mainPositions.getZ(i);
+        
+        // Create rocky, irregular surface
+        const noise1 = Math.random() * 0.5 - 0.25;
+        const noise2 = Math.random() * 0.3 - 0.15;
+        const noise3 = Math.random() * 0.2 - 0.1;
+        
+        mainPositions.setX(i, x * (1 + noise1));
+        mainPositions.setY(i, y * (1 + noise2));
+        mainPositions.setZ(i, z * (1 + noise3));
+    }
+    mainPositions.needsUpdate = true;
+    mainGeometry.computeVertexNormals();
+    
+    // Create rocky meteor texture
+    const texture = createRockyMeteorTexture();
+    
+    const mainMaterial = new THREE.MeshStandardMaterial({
+        map: texture,
+        normalMap: createRockyNormalMap(),
+        roughnessMap: createRockyRoughnessMap(),
+        metalness: 0.1,
+        roughness: 0.9,
+        emissive: new THREE.Color(0xff4500),
+        emissiveIntensity: 0.3,
+        emissiveMap: createRockyEmissiveMap()
+    });
+    
+    const mainBody = new THREE.Mesh(mainGeometry, mainMaterial);
+    mainBody.castShadow = true;
+    mainBody.receiveShadow = true;
+    group.add(mainBody);
+    
+    // Add fiery glow around meteor
+    const glowGeometry = new THREE.SphereGeometry(2.5, 16, 16);
+    const glowMaterial = new THREE.MeshBasicMaterial({
+        color: 0xff4500,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.BackSide
+    });
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    group.add(glow);
+    
+    // Add fire trail
+    createFireTrail(group);
+    
+    meteor = group;
+    scene.add(meteor);
+}
+
+// Create fire trail behind meteor
+function createFireTrail(group) {
+    const trailGeometry = new THREE.ConeGeometry(0.5, 8, 8);
+    const trailMaterial = new THREE.MeshBasicMaterial({
+        color: 0xff4500,
+        transparent: true,
+        opacity: 0.6,
+        side: THREE.DoubleSide
+    });
+    
+    const trail = new THREE.Mesh(trailGeometry, trailMaterial);
+    trail.position.set(0, -4, 0);
+    trail.rotation.x = Math.PI;
+    group.add(trail);
+    
+    // Add multiple trail segments for longer trail
+    for (let i = 1; i < 5; i++) {
+        const segmentGeometry = new THREE.ConeGeometry(0.3, 6, 6);
+        const segmentMaterial = new THREE.MeshBasicMaterial({
+            color: 0xff6500,
+            transparent: true,
+            opacity: 0.4 - (i * 0.08),
+            side: THREE.DoubleSide
+        });
+        
+        const segment = new THREE.Mesh(segmentGeometry, segmentMaterial);
+        segment.position.set(0, -4 - (i * 3), 0);
+        segment.rotation.x = Math.PI;
+        group.add(segment);
+    }
+}
+
+// Create rocky meteor texture
+function createRockyMeteorTexture() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 1024;
+    canvas.height = 1024;
+    const ctx = canvas.getContext('2d');
+    
+    // Base rocky color
+    const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 256);
+    gradient.addColorStop(0, '#6a5a4a');
+    gradient.addColorStop(0.5, '#5a4a3a');
+    gradient.addColorStop(1, '#4a3a2a');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, 1024, 1024);
+    
+    // Add rocky patterns
+    ctx.fillStyle = '#4a3a2a';
+    for (let i = 0; i < 80; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            Math.random() * 1024,
+            Math.random() * 1024,
+            Math.random() * 15 + 5,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+    
+    // Add darker rock areas
+    ctx.fillStyle = '#3a2a1a';
+    for (let i = 0; i < 50; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            Math.random() * 1024,
+            Math.random() * 1024,
+            Math.random() * 12 + 3,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+    
+    // Add heat discoloration
+    ctx.fillStyle = '#8a4a2a';
+    for (let i = 0; i < 30; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            Math.random() * 1024,
+            Math.random() * 1024,
+            Math.random() * 8 + 2,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+    
+    // Add impact craters
+    ctx.fillStyle = '#2a1a0a';
+    for (let i = 0; i < 15; i++) {
+        const x = Math.random() * 1024;
+        const y = Math.random() * 1024;
+        const radius = Math.random() * 20 + 8;
+        
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Add crater rim
+        ctx.strokeStyle = '#4a3a2a';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+}
+
+// Create rocky normal map
+function createRockyNormalMap() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    const imageData = ctx.createImageData(512, 512);
+    for (let y = 0; y < 512; y++) {
+        for (let x = 0; x < 512; x++) {
+            const i = (y * 512 + x) * 4;
+            
+            // Create metallic surface noise
+            const noise1 = Math.random() * 0.6 + 0.4;
+            const noise2 = Math.random() * 0.4 + 0.6;
+            
+            const combinedNoise = (noise1 + noise2) / 2;
+            
+            imageData.data[i] = combinedNoise * 255;
+            imageData.data[i + 1] = combinedNoise * 255;
+            imageData.data[i + 2] = 255;
+            imageData.data[i + 3] = 255;
+        }
+    }
+    ctx.putImageData(imageData, 0, 0);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    return texture;
+}
+
+// Create rocky roughness map
+function createRockyRoughnessMap() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    // Base roughness for rocky surface
+    ctx.fillStyle = '#808080';
+    ctx.fillRect(0, 0, 512, 512);
+    
+    const imageData = ctx.getImageData(0, 0, 512, 512);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+        const baseRoughness = 0.9;
+        const variation = Math.random() * 0.2 + 0.8;
+        const finalRoughness = baseRoughness * variation;
+        
+        imageData.data[i] = finalRoughness * 255;
+        imageData.data[i + 1] = finalRoughness * 255;
+        imageData.data[i + 2] = finalRoughness * 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
+// Create rocky emissive map
+function createRockyEmissiveMap() {
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+    
+    // Black base
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, 512, 512);
+    
+    // Add heat glow from atmospheric entry
+    ctx.fillStyle = '#ff4500';
+    for (let i = 0; i < 25; i++) {
+        ctx.beginPath();
+        ctx.arc(
+            Math.random() * 512,
+            Math.random() * 512,
+            Math.random() * 15 + 5,
+            0,
+            Math.PI * 2
+        );
+        ctx.fill();
+    }
+    
+    const texture = new THREE.CanvasTexture(canvas);
+    return texture;
+}
+
+// Setup dramatic lighting for atmospheric entry
+function setupLighting() {
+    // Very subtle ambient light
+    const ambientLight = new THREE.AmbientLight(0x202020, 0.1);
+    scene.add(ambientLight);
+    
+    // Main directional light (sunlight)
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    directionalLight.position.set(10, 5, 5);
+    directionalLight.castShadow = true;
+    directionalLight.shadow.mapSize.width = 4096;
+    directionalLight.shadow.mapSize.height = 4096;
+    directionalLight.shadow.camera.near = 0.1;
+    directionalLight.shadow.camera.far = 100;
+    directionalLight.shadow.camera.left = -10;
+    directionalLight.shadow.camera.right = 10;
+    directionalLight.shadow.camera.top = 10;
+    directionalLight.shadow.camera.bottom = -10;
+    directionalLight.shadow.bias = -0.0001;
+    scene.add(directionalLight);
+    
+    // Fire glow light
+    const fireLight = new THREE.PointLight(0xff4500, 2, 20);
+    fireLight.position.set(0, 0, 0);
+    scene.add(fireLight);
+    
+    // Trail light
+    const trailLight = new THREE.PointLight(0xff6500, 1, 15);
+    trailLight.position.set(0, -8, 0);
+    scene.add(trailLight);
+    
+    // Rim light for edge definition
+    const rimLight = new THREE.DirectionalLight(0xff6500, 0.5);
+    rimLight.position.set(0, -5, -10);
+    scene.add(rimLight);
+}
+
+// Add atmospheric effects
+function addAtmosphericEffects() {
+    // Remove particle effects to avoid rendering issues
+    // Simple clean space environment
+}
+
+// Setup orbit controls
+function setupControls() {
+    controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.enableZoom = true;
+    controls.enablePan = false;
+    controls.minDistance = 3;
+    controls.maxDistance = 20;
+    controls.autoRotate = false;
+}
+
+// Animation loop
+function animate() {
+    animationId = requestAnimationFrame(animate);
+    
+    // Meteor only rotates when user drags it (no automatic rotation)
+    
+    // Update controls
+    controls.update();
+    
+    // Render scene
+    renderer.render(scene, camera);
+}
+
+// Handle window resize
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+}
+
+// Event listeners
+window.addEventListener('resize', onWindowResize);
+
+// Initialize when page loads
+window.addEventListener('load', init);
