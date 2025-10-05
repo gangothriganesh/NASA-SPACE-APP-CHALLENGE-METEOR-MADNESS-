@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Pixel Chicken Jump (Night Mode + Effects)</title>
+  <style>
+    body {
+      background:#07071a;
+      color:#fff;
+      font-family:"Courier New", Courier, monospace;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      height:100vh;
+      margin:0;
+    }
+    #game-container {
+      border:4px solid #0b1020;
+      box-shadow:0 0 0 6px rgba(10,12,30,0.7);
+      background:#0a0b14;
+      padding:1rem;
+      position:relative;
+    }
+    canvas {
+      display:block;
+      border:4px solid #0b1020;
+      image-rendering:pixelated;
+      background: transparent;
+    }
+    #info, #controls, #instructions { text-align:center; }
+    #info { margin:0.5rem 0; }
+    #controls { margin-top:0.5rem; }
+    #instructions {
+      font-size:0.9rem;
+      padding:6px;
+      background:#101225;
+      border:2px solid #0b1020;
+      margin-bottom:0.5rem;
+      color:#dfe9ff;
+    }
+    .pixel-button {
+      font-family:"Courier New", Courier, monospace;
+      font-size:1rem;
+      color:#fff;
+      background:#2e7d32;
+      border:3px solid #0b1020;
+      padding:8px 16px;
+      cursor:pointer;
+      box-shadow:0 4px #081017;
+      margin:0 5px;
+    }
+    .pixel-button:active { transform:translateY(2px); box-shadow:0 2px #081017; }
+    #retryBtn { background:#c62828; }
+    #pauseBtn { background:#ff8f00; color:#111; }
+    #startBtn {
+      background:#1565c0;
+      position:absolute;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      font-size:1.4rem;
+      padding:16px 32px;
+    }
+    @media (max-width:900px){
+      canvas { width:90vw; height:auto; }
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <div id="instructions">
+      <b>Controls:</b> Space / Click = Jump • P = Pause • R = Retry<br>
+      Play until you lose 🎯
+    </div>
+    <div id="info">
+      <h2>Meteor Storm ☄</h2>
+      <p id="status" style="color:#90EE90;">Use Space or Click to jump.</p>
+      <p>High Score: <b id="highScore">0</b></p>
+    </div>
+    <canvas id="game" width="800" height="400"></canvas>
+    <div id="controls">
+      <button id="pauseBtn" class="pixel-button">Pause</button>
+      <button id="retryBtn" class="pixel-button" style="display:none;">Retry</button>
+    </div>
+    <button id="startBtn" class="pixel-button">Start Game</button>
+  </div>
+
+<script>
+'use strict';
+
+/* ===== Game constants ===== */
+const canvas = document.getElementById("game"), ctx = canvas.getContext("2d");
+const W = canvas.width, H = canvas.height;
+const CHICKEN_SIZE = 40;
+const FLOOR_Y = H - 50;
+const GROUND_LEVEL = FLOOR_Y + CHICKEN_SIZE;
+
+/* ===== State ===== */
+let chicken, gravity, obstacles, obstacleTimer, obstacleSpeed, score, running, gameOver, isPaused, highScore, clouds, gameStarted;
+
+/* Visual elements */
+let starsNear = [], starsFar = [], moon, shootingStars = [], backgroundMeteors = [];
+
+/* ===== Init ===== */
+function initState(){
+  chicken = { x:100, y:FLOOR_Y, w:CHICKEN_SIZE, h:CHICKEN_SIZE, vy:0, isJumping:false, wingPhase:0 };
+  gravity = 0.7;
+  obstacles = [];
+  obstacleTimer = 0;
+  obstacleSpeed = 6;
+  score = 0;
+  running = true;
+  gameOver = false;
+  isPaused = false;
+  gameStarted = false;
+  highScore = parseInt(localStorage.getItem("pixelChickenHighScore"), 10) || 0;
+  document.getElementById("highScore").textContent = highScore;
+
+  clouds = [
+    { x:100, y:90, w:140 }, { x:420, y:60, w:180 }, { x:740, y:120, w:140 }
+  ];
+
+  // stars: two layers for parallax
+  starsNear = [];
+  for(let i=0;i<70;i++){
+    starsNear.push({
+      x: Math.random()*W,
+      y: Math.random()*(GROUND_LEVEL - 20),
+      r: Math.random()*1.2 + 0.6,
+      speed: 0.08 + Math.random()*0.12,
+      twinkle: Math.random()*0.05 + 0.01,
+      phase: Math.random()*Math.PI*2
+    });
+  }
+  starsFar = [];
+  for(let i=0;i<140;i++){
+    starsFar.push({
+      x: Math.random()*W,
+      y: Math.random()*(GROUND_LEVEL - 20),
+      r: Math.random()*0.8 + 0.2,
+      speed: 0.02 + Math.random()*0.05,
+      twinkle: Math.random()*0.03 + 0.005,
+      phase: Math.random()*Math.PI*2
+    });
+  }
+
+  moon = { x: W - 120, y: 80, r: 36, phase: 0.25, speed: 0.02 };
+
+  shootingStars = [];
+
+  backgroundMeteors = [];
+  for(let i=0;i<5;i++){
+    backgroundMeteors.push({
+      x: Math.random()*W,
+      y: Math.random()*(GROUND_LEVEL-100),
+      length: 20+Math.random()*40,
+      speed: 2+Math.random()*2
+    });
+  }
+}
+
+/* ===== Draw helpers ===== */
+function drawNightSky(){
+  const g = ctx.createLinearGradient(0,0,0,GROUND_LEVEL);
+  g.addColorStop(0,'#001428');
+  g.addColorStop(0.6,'#001a33');
+  g.addColorStop(1,'#000814');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,W,GROUND_LEVEL);
+
+  starsFar.forEach(s=>{
+    s.phase += s.twinkle;
+    s.x -= s.speed;
+    if(s.x < -10) s.x = W + Math.random()*20;
+    const alpha = 0.45 + Math.sin(s.phase)*0.35;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  starsNear.forEach(s=>{
+    s.phase += s.twinkle*1.2;
+    s.x -= s.speed;
+    if(s.x < -10) s.x = W + Math.random()*40;
+    const alpha = 0.6 + Math.sin(s.phase)*0.4;
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  moon.x -= moon.speed;
+  if(moon.x < -moon.r*2) moon.x = W + moon.r*2;
+  drawMoon();
+
+  shootingStars.forEach((s,i)=>{
+    s.x += s.vx; s.y += s.vy; s.life -= 1;
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(255,255,255,${Math.max(0, s.life / s.maxLife)})`;
+    ctx.lineWidth = s.width;
+    ctx.moveTo(s.x - s.vx*2, s.y - s.vy*2);
+    ctx.lineTo(s.x, s.y);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(255,255,255,${Math.max(0, s.life / s.maxLife)})`;
+    ctx.arc(s.x, s.y, s.width*1.5, 0, Math.PI*2);
+    ctx.fill();
+
+    if(s.life <= 0 || s.y > GROUND_LEVEL + 50 || s.x < -50 || s.x > W + 50) shootingStars.splice(i,1);
+  });
+
+  if(Math.random() < 0.008 && shootingStars.length < 6) spawnShootingStar();
+
+  backgroundMeteors.forEach(m=>{
+    m.x -= m.speed;
+    ctx.beginPath();
+    ctx.strokeStyle = "rgba(255,255,255,0.6)";
+    ctx.lineWidth = 2;
+    ctx.moveTo(m.x,m.y);
+    ctx.lineTo(m.x+m.length,m.y+m.length*0.2);
+    ctx.stroke();
+    if(m.x + m.length < 0){
+      m.x = W + Math.random()*200;
+      m.y = Math.random()*(GROUND_LEVEL-100);
+    }
+  });
+}
+
+function drawMoon(){
+  const mx = moon.x, my = moon.y, mr = moon.r;
+  ctx.beginPath();
+  ctx.fillStyle = '#F8F3C4';
+  ctx.arc(mx,my,mr,0,Math.PI*2);
+  ctx.fill();
+
+  // carve a crescent using globalCompositeOperation safely
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath();
+  const cutX = mx + mr * (0.6 + moon.phase*0.6);
+  ctx.arc(cutX, my - mr*0.08, mr, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  const halo = ctx.createRadialGradient(mx,my,mr*0.6,mx,my,mr*2.2);
+  halo.addColorStop(0,'rgba(248,243,196,0.25)');
+  halo.addColorStop(1,'rgba(248,243,196,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath(); ctx.arc(mx,my,mr*2.2,0,Math.PI*2); ctx.fill();
+}
+
+function spawnShootingStar(){
+  const sx = Math.random()*(W*0.6) + W*0.3;
+  const sy = Math.random()*(GROUND_LEVEL*0.35) + 10;
+  const angle = (Math.PI/3) + (Math.random()*Math.PI/8);
+  const speed = 8 + Math.random()*6;
+  const vx = -Math.cos(angle)*speed;
+  const vy = Math.sin(angle)*speed;
+  shootingStars.push({ x: sx, y: sy, vx: vx, vy: vy, life: 30+Math.floor(Math.random()*30), maxLife: 30+Math.floor(Math.random()*30), width: 1+Math.random()*1.5 });
+}
+
+function drawClouds(){
+  ctx.fillStyle="rgba(220,220,235,0.12)";
+  clouds.forEach(cl=>{
+    ctx.fillRect(cl.x,cl.y,cl.w,22);
+    ctx.fillRect(cl.x+18,cl.y-8,cl.w-36,36);
+  });
+}
+
+function drawChicken(){
+  const c = chicken;
+  ctx.fillStyle = "#FFFFFF"; ctx.fillRect(c.x,c.y,c.w,c.h);
+  ctx.fillStyle = "#FFB74D"; ctx.fillRect(c.x+c.w-8,c.y+Math.floor(c.h/2)-3,8,6);
+  ctx.fillStyle = "#111"; ctx.fillRect(c.x+Math.floor(c.w/2),c.y+10,4,4);
+  if(c.isJumping){
+    c.wingPhase += 0.3;
+    const offset = Math.sin(c.wingPhase)*6;
+    ctx.fillStyle = "#EEEEEE";
+    ctx.fillRect(c.x+5,c.y+10+offset,8,12);
+    ctx.fillRect(c.x+c.w-13,c.y+10-offset,8,12);
+  }
+}
+
+function drawObstacle(ob){
+  const y = GROUND_LEVEL - ob.h;
+  ctx.fillStyle = "#6b6b6b";
+  ctx.fillRect(ob.x,y,ob.w,ob.h);
+  ctx.fillStyle = "#4a4a4a";
+  ctx.fillRect(ob.x-5,y,ob.w+10,18);
+}
+
+/* ===== Logic ===== */
+function doJump(){ if(!chicken.isJumping && !gameOver){ chicken.vy = -12; chicken.isJumping = true; } }
+
+function resetGame(){
+  initState();
+  gameStarted = true;
+  document.getElementById("status").textContent = "Use Space or Click to jump.";
+  document.getElementById("retryBtn").style.display = "none";
+  document.getElementById("pauseBtn").textContent = "Pause";
+  document.getElementById("pauseBtn").disabled = false;
+}
+
+function update(){
+  chicken.vy += gravity; chicken.y += chicken.vy;
+  if(chicken.y >= FLOOR_Y){ chicken.y = FLOOR_Y; chicken.vy = 0; chicken.isJumping = false; }
+
+  clouds.forEach(cl=>{ cl.x -= obstacleSpeed*0.12; if(cl.x + cl.w < -50) cl.x = W + Math.random()*100; });
+
+  obstacleTimer++;
+  if(obstacleTimer > 100/(obstacleSpeed/6)){
+    obstacleTimer = 0;
+    const h = 20 + Math.random()*60;
+    obstacles.push({ x: W, w: 30 + Math.floor(Math.random()*30), h: h });
+  }
+  for(let i=obstacles.length-1;i>=0;i--){
+    let ob = obstacles[i]; ob.x -= obstacleSpeed;
+    if(ob.x + ob.w < 0){
+      obstacles.splice(i,1);
+      score++;
+      if(score > highScore){
+        highScore = score;
+        document.getElementById("highScore").textContent = highScore;
+        localStorage.setItem("pixelChickenHighScore", highScore);
+      }
+      if(score > 0 && score % 2 === 0) obstacleSpeed += 0.4;
+    }
+  }
+
+  const r = { x: chicken.x, y: chicken.y, w: chicken.w, h: chicken.h };
+  for(const ob of obstacles){
+    const or = { x: ob.x, y: GROUND_LEVEL - ob.h, w: ob.w, h: ob.h };
+    if(r.x < or.x + or.w && r.x + r.w > or.x && r.y < or.y + or.h && r.y + r.h > or.y){
+      running = false; gameOver = true;
+      document.getElementById("status").textContent = "Game Over! Your score: " + score;
+      document.getElementById("retryBtn").style.display = "inline-block";
+      document.getElementById("pauseBtn").disabled = true;
+    }
+  }
+}
+
+/* ===== Render ===== */
+function render(){
+  ctx.clearRect(0,0,W,H);
+  drawNightSky();
+  drawClouds();
+  ctx.fillStyle="#2f3b2b"; ctx.fillRect(0,GROUND_LEVEL,W,H-GROUND_LEVEL);
+  ctx.fillStyle="#1e2318"; ctx.fillRect(0,GROUND_LEVEL+5,W,H-GROUND_LEVEL-5);
+  drawChicken();
+  if(gameStarted) obstacles.forEach(drawObstacle);
+
+  ctx.fillStyle="#f0f6ff"; ctx.strokeStyle="#031025"; ctx.lineWidth=4;
+  ctx.font='24px "Courier New"'; ctx.strokeText("Score: " + score,10,30);
+  ctx.fillText("Score: " + score,10,30);
+
+  if(isPaused){
+    ctx.fillStyle="rgba(0,0,0,0.5)"; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#fff"; ctx.font='60px "Courier New"'; ctx.textAlign="center";
+    ctx.strokeText("PAUSED",W/2,H/2); ctx.fillText("PAUSED",W/2,H/2); ctx.textAlign="left";
+  }
+}
+
+function loop(){ if(gameStarted && !isPaused && running) update(); render(); requestAnimationFrame(loop); }
+
+/* ===== Controls ===== */
+window.addEventListener("keydown", e=>{
+  if(e.code === "Space" && gameStarted){
+    e.preventDefault(); // stop page scrolling
+    doJump();
+  }
+  if(e.code === "KeyP" && gameStarted && !gameOver){
+    isPaused = !isPaused;
+    document.getElementById("pauseBtn").textContent = isPaused ? "Resume" : "Pause";
+    document.getElementById("status").textContent = isPaused ? "Game Paused" : "Use Space or Click to jump.";
+  }
+  if(e.code === "KeyR" && gameOver) resetGame();
+});
+
+canvas.addEventListener("mousedown", ()=>{ if(gameStarted) doJump(); });
+canvas.addEventListener("touchstart", (e)=>{ e.preventDefault(); if(gameStarted) doJump(); }, { passive:false });
+
+document.getElementById("startBtn").addEventListener("click", ()=>{
+  gameStarted = true;
+  document.getElementById("startBtn").style.display = "none";
+});
+document.getElementById("retryBtn").addEventListener("click", resetGame);
+document.getElementById("pauseBtn").addEventListener("click", ()=>{
+  if(gameOver || !gameStarted) return;
+  isPaused = !isPaused;
+  document.getElementById("pauseBtn").textContent = isPaused ? "Resume" : "Pause";
+  document.getElementById("status").textContent = isPaused ? "Game Paused" : "Use Space or Click to jump.";
+});
+
+/* ===== Start ===== */
+initState();
+loop();
+</script>
+</body>
+</html>ga
