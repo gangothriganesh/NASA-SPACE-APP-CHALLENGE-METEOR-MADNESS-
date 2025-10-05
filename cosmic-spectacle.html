@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmic Spectacle: Meteor Showers</title>
+    <style>
+        :root {
+            --bg-dark: #0A0A1F;
+            --text-light: #E0E0FF;
+            --accent-blue: #00BFFF;
+            --accent-purple: #8A2BE2;
+            --card-bg: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(0, 191, 255, 0.4);
+            --hover-glow: rgba(0, 191, 255, 0.7);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top left, var(--accent-purple) 0%, transparent 25%),
+                        radial-gradient(circle at bottom right, var(--accent-blue) 0%, transparent 25%);
+            background-size: 200% 200%;
+            animation: moveBackground 20s infinite alternate linear;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        @keyframes moveBackground {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 100%; }
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+            background: linear-gradient(to bottom, rgba(10, 10, 31, 0.8), transparent);
+            position: relative;
+            z-index: 1;
+        }
+
+        header h1 {
+            font-size: 3.5em;
+            margin-bottom: 10px;
+            color: var(--accent-blue);
+            text-shadow: 0 0 15px var(--accent-blue);
+        }
+
+        header p {
+            font-size: 1.2em;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meteor-shower-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: 12px;
+            padding: 25px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 0 20px rgba(0, 191, 255, 0.1);
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .meteor-shower-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 0 30px var(--hover-glow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.2);
+            padding-bottom: 10px;
+        }
+
+        .card-header h2 {
+            font-size: 1.8em;
+            color: var(--accent-purple);
+            margin: 0;
+        }
+
+        .peak-info {
+            font-size: 0.9em;
+            color: var(--accent-blue);
+            background-color: rgba(0, 191, 255, 0.15);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .meteor-shower-card p {
+            font-size: 1.05em;
+            color: var(--text-light);
+            opacity: 0.9;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 50px;
+            color: var(--text-light);
+            opacity: 0.6;
+            background: linear-gradient(to top, rgba(10, 10, 31, 0.8), transparent);
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.5em;
+            }
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .meteor-shower-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <header>
+        <h1>Cosmic Spectacle</h1>
+        <p>Journey Through the Meteor Showers</p>
+    </header>
+
+    <main class="container">
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <h2>The Perseids</h2>
+                <span class="peak-info">Peak: August</span>
+            </div>
+            <p>Among the most popular meteor showers, peaking every August when Earth passes through the debris of Comet Swift–Tuttle. They are especially famous for producing up to one hundred meteors per hour, often bright with long glowing tails, which makes them one of the most observed showers across the world.</p>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <h2>The Geminids</h2>
+                <span class="peak-info">Peak: December</span>
+            </div>
+            <p>Light up the sky and are known for their reliability and stunning colors. Unlike most meteor showers that come from comets, the Geminids originate from the asteroid-like object 3200 Phaethon. With as many as 120 to 150 meteors per hour, often in shades of green, yellow, and red, they are one of the richest showers of the year.</p>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <h2>The Leonids</h2>
+                <span class="peak-info">Peak: November</span>
+            </div>
+            <p>Remembered for their rare meteor storms when thousands of meteors streak across the sky in a single night. Caused by the debris of Comet Tempel–Tuttle, they have produced some of history’s most spectacular events, notably in 1833 and 1966.</p>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <h2>The Quadrantids</h2>
+                <span class="peak-info">Peak: January</span>
+            </div>
+            <p>A short but intense shower that appears every January. Originating from the debris of asteroid 2003 EH1, they create exceptionally bright fireballs. However, their peak lasts for only a few hours, making them harder to catch.</p>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <h2>The Eta Aquarids</h2>
+                <span class="peak-info">Peak: May</span>
+            </div>
+            <p>Best seen in early May, come from Halley’s Comet. They are particularly fast-moving meteors, with speeds up to seventy per hour, and are most impressive in the Southern Hemisphere.</p>
+        </section>
+
+        <section class="meteor-shower-card">
+            <div class="card-header">
+                <h2>The Orionids</h2>
+                <span class="peak-info">Peak: October</span>
+            </div>
+            <p>Another shower linked to Halley’s Comet, which peak in October. These meteors are known for their speed and the long glowing trails they leave across the autumn night sky.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2023 Cosmic Insights</p>
+    </footer>
+</body>
+</html>
